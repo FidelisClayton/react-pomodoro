@@ -1,7 +1,7 @@
 module Update exposing (update)
 
-import Messages exposing (Msg(Play, Stop))
-import Model exposing (Model)
+import Messages exposing (Msg(..))
+import Model exposing (Model, timeTypes)
 import Ports
 
 
@@ -14,5 +14,14 @@ update msg model =
         Stop ->
             { model | play = False } ! [ Ports.pause () ]
 
-        _ ->
-            model ! []
+        SetTime time ->
+            { model | time = time } ! []
+
+        SetTimeType type_ ->
+            let
+                newTimeType =
+                    List.filter (\t -> t.type_ == type_) timeTypes
+                        |> List.head
+                        |> Maybe.withDefault model.timeType
+            in
+            { model | timeType = newTimeType, time = newTimeType.time } ! [ Ports.setTime newTimeType.time ]

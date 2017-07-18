@@ -31,18 +31,19 @@ export default class Pomodoro extends React.Component {
     this.setDefaultTime();
     this.startShortcuts();
     Notification.requestPermission();
-    this.mountElm(document.getElementById("elm-pomodoro"), this.state)
+    this.mountElm(document.querySelector(".elm-pomodoro"), this.state);
   }
 
   mountElm(node, flags) {
-    const app = Elm.Pomodoro.embed(node, flags)
-
-    this.setupPorts(app)
+    const app = Elm.Pomodoro.embed(node, flags);
+    this.elmApp = app;
+    this.setupPorts(app);
   }
 
   setupPorts(app) {
-    app.ports.play.subscribe(this.play)
-    app.ports.pause.subscribe(this.reset)
+    app.ports.play.subscribe(this.play);
+    app.ports.pause.subscribe(this.reset);
+    app.ports.setTime.subscribe(this.setTime.bind(this));
   }
 
   elapseTime() {
@@ -53,6 +54,7 @@ export default class Pomodoro extends React.Component {
     if (this.state.play === true) {
       let newState = this.state.time - 1;
       this.setState({time: newState, title: this.getTitle(newState)});
+      this.elmApp.ports.elapseTime.send(newState);
     }
   }
 
@@ -214,28 +216,8 @@ export default class Pomodoro extends React.Component {
 
         {/* Main section
         ------------------------------- */}
-        <div id="elm-pomodoro"></div>
-        <div className="main">
-
-          <div className="container display timer">
-            <span className="time">{this.format(this.state.time)}</span>
-            <span className="timeType">The {this.formatType(this.state.timeType)} time!</span>
-          </div>
-
-          <div className="container display types">
-            <button className="btn code" onClick={this.setTimeForCode}>Code</button>
-            <button className="btn social" onClick={this.setTimeForSocial}>Social</button>
-            <button className="btn coffee" onClick={this.setTimeForCoffee}>Coffee</button>
-          </div>
-
-          <div className="container">
-            <div className="controlsPlay">
-              <button className="play btnIcon" onClick={this.play}></button>
-              <button className="stop btnIcon" onClick={this.reset}></button>
-            </div>
-          </div>
-
-        </div> {/* main */}
+        <div className="elm-pomodoro"></div>
+        {/* main */}
 
         {/* Bottom section
         ------------------------------- */}

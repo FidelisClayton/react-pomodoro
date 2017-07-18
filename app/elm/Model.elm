@@ -1,9 +1,15 @@
 module Model exposing (..)
 
 
+type TimeType
+    = Code
+    | Social
+    | Coffee
+
+
 type alias Model =
     { time : Float
-    , timeType : Int
+    , timeType : TimeTypeModel
     , title : String
     , play : Bool
     }
@@ -17,16 +23,17 @@ type alias Flags =
     }
 
 
-type alias TimeType =
-    { type_ : String
+type alias TimeTypeModel =
+    { type_ : TimeType
     , time : Float
+    , displayText : String
     }
 
 
 initialModel : Flags -> Model
 initialModel flags =
-    { time = flags.time
-    , timeType = flags.timeType
+    { time = timeCode.time
+    , timeType = timeCode
     , title = flags.title
     , play = flags.play
     }
@@ -37,9 +44,24 @@ init flags =
     initialModel flags ! []
 
 
-timeTypes : List TimeType
+timeCode : TimeTypeModel
+timeCode =
+    { type_ = Code, time = 1500, displayText = "code" }
+
+
+timeSocial : TimeTypeModel
+timeSocial =
+    { type_ = Social, time = 300, displayText = "social" }
+
+
+timeCoffee : TimeTypeModel
+timeCoffee =
+    { type_ = Coffee, time = 900, displayText = "coffee" }
+
+
+timeTypes : List TimeTypeModel
 timeTypes =
-    [ { type_ = "code", time = 15000 }
-    , { type_ = "social", time = 300 }
-    , { type_ = "coffee", time = 900 }
+    [ timeCode
+    , timeSocial
+    , timeCoffee
     ]

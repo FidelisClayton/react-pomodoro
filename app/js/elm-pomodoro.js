@@ -12416,34 +12416,6 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
-var _user$project$Messages$SetTimeType = function (a) {
-	return {ctor: 'SetTimeType', _0: a};
-};
-var _user$project$Messages$Stop = {ctor: 'Stop'};
-var _user$project$Messages$Play = {ctor: 'Play'};
-
-var _user$project$Model$timeTypes = {
-	ctor: '::',
-	_0: {type_: 'code', time: 15000},
-	_1: {
-		ctor: '::',
-		_0: {type_: 'social', time: 300},
-		_1: {
-			ctor: '::',
-			_0: {type_: 'coffee', time: 900},
-			_1: {ctor: '[]'}
-		}
-	}
-};
-var _user$project$Model$initialModel = function (flags) {
-	return {time: flags.time, timeType: flags.timeType, title: flags.title, play: flags.play};
-};
-var _user$project$Model$init = function (flags) {
-	return A2(
-		_elm_lang$core$Platform_Cmd_ops['!'],
-		_user$project$Model$initialModel(flags),
-		{ctor: '[]'});
-};
 var _user$project$Model$Model = F4(
 	function (a, b, c, d) {
 		return {time: a, timeType: b, title: c, play: d};
@@ -12452,14 +12424,47 @@ var _user$project$Model$Flags = F4(
 	function (a, b, c, d) {
 		return {time: a, timeType: b, title: c, play: d};
 	});
-var _user$project$Model$TimeType = F2(
-	function (a, b) {
-		return {type_: a, time: b};
+var _user$project$Model$TimeTypeModel = F3(
+	function (a, b, c) {
+		return {type_: a, time: b, displayText: c};
 	});
-
-var _user$project$Subscriptions$subscriptions = function (model) {
-	return _elm_lang$core$Platform_Sub$none;
+var _user$project$Model$Coffee = {ctor: 'Coffee'};
+var _user$project$Model$timeCoffee = {type_: _user$project$Model$Coffee, time: 900, displayText: 'coffee'};
+var _user$project$Model$Social = {ctor: 'Social'};
+var _user$project$Model$timeSocial = {type_: _user$project$Model$Social, time: 300, displayText: 'social'};
+var _user$project$Model$Code = {ctor: 'Code'};
+var _user$project$Model$timeCode = {type_: _user$project$Model$Code, time: 1500, displayText: 'code'};
+var _user$project$Model$initialModel = function (flags) {
+	return {time: _user$project$Model$timeCode.time, timeType: _user$project$Model$timeCode, title: flags.title, play: flags.play};
 };
+var _user$project$Model$init = function (flags) {
+	return A2(
+		_elm_lang$core$Platform_Cmd_ops['!'],
+		_user$project$Model$initialModel(flags),
+		{ctor: '[]'});
+};
+var _user$project$Model$timeTypes = {
+	ctor: '::',
+	_0: _user$project$Model$timeCode,
+	_1: {
+		ctor: '::',
+		_0: _user$project$Model$timeSocial,
+		_1: {
+			ctor: '::',
+			_0: _user$project$Model$timeCoffee,
+			_1: {ctor: '[]'}
+		}
+	}
+};
+
+var _user$project$Messages$SetTime = function (a) {
+	return {ctor: 'SetTime', _0: a};
+};
+var _user$project$Messages$SetTimeType = function (a) {
+	return {ctor: 'SetTimeType', _0: a};
+};
+var _user$project$Messages$Stop = {ctor: 'Stop'};
+var _user$project$Messages$Play = {ctor: 'Play'};
 
 var _user$project$Ports$play = _elm_lang$core$Native_Platform.outgoingPort(
 	'play',
@@ -12471,6 +12476,21 @@ var _user$project$Ports$pause = _elm_lang$core$Native_Platform.outgoingPort(
 	function (v) {
 		return null;
 	});
+var _user$project$Ports$setTime = _elm_lang$core$Native_Platform.outgoingPort(
+	'setTime',
+	function (v) {
+		return v;
+	});
+var _user$project$Ports$elapseTime = _elm_lang$core$Native_Platform.incomingPort('elapseTime', _elm_lang$core$Json_Decode$float);
+
+var _user$project$Subscriptions$subscriptions = function (model) {
+	return _elm_lang$core$Platform_Sub$batch(
+		{
+			ctor: '::',
+			_0: _user$project$Ports$elapseTime(_user$project$Messages$SetTime),
+			_1: {ctor: '[]'}
+		});
+};
 
 var _user$project$Update$update = F2(
 	function (msg, model) {
@@ -12500,14 +12520,69 @@ var _user$project$Update$update = F2(
 							{ctor: '_Tuple0'}),
 						_1: {ctor: '[]'}
 					});
-			default:
+			case 'SetTime':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					model,
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{time: _p0._0}),
 					{ctor: '[]'});
+			default:
+				var newTimeType = A2(
+					_elm_lang$core$Maybe$withDefault,
+					model.timeType,
+					_elm_lang$core$List$head(
+						A2(
+							_elm_lang$core$List$filter,
+							function (t) {
+								return _elm_lang$core$Native_Utils.eq(t.type_, _p0._0);
+							},
+							_user$project$Model$timeTypes)));
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{timeType: newTimeType, time: newTimeType.time}),
+					{
+						ctor: '::',
+						_0: _user$project$Ports$setTime(newTimeType.time),
+						_1: {ctor: '[]'}
+					});
 		}
 	});
 
+var _user$project$Views$paddNumber = function (value) {
+	return (_elm_lang$core$Native_Utils.cmp(value, 10) < 0) ? A2(
+		_elm_lang$core$Basics_ops['++'],
+		'0',
+		_elm_lang$core$Basics$toString(value)) : A2(
+		_elm_lang$core$Basics_ops['++'],
+		'',
+		_elm_lang$core$Basics$toString(value));
+};
+var _user$project$Views$formatTime = function (time) {
+	var parsedTime = _elm_lang$core$Basics$round(time);
+	var _p0 = A2(
+		_elm_lang$core$Debug$log,
+		_elm_lang$core$Basics$toString(parsedTime),
+		_elm_lang$core$Basics$toString(time));
+	var minutes = _elm_lang$core$Basics$floor(
+		_elm_lang$core$Basics$toFloat(
+			(A2(_elm_lang$core$Basics_ops['%'], parsedTime, 3600) / 60) | 0));
+	var seconds = _elm_lang$core$Basics$floor(
+		_elm_lang$core$Basics$toFloat(
+			A2(
+				_elm_lang$core$Basics_ops['%'],
+				A2(_elm_lang$core$Basics_ops['%'], parsedTime, 3600),
+				60)));
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		_user$project$Views$paddNumber(minutes),
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			':',
+			_user$project$Views$paddNumber(seconds)));
+};
 var _user$project$Views$controlsPlay = A2(
 	_elm_lang$html$Html$div,
 	{
@@ -12560,7 +12635,12 @@ var _user$project$Views$displayTypes = A2(
 			{
 				ctor: '::',
 				_0: _elm_lang$html$Html_Attributes$class('btn code'),
-				_1: {ctor: '[]'}
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Events$onClick(
+						_user$project$Messages$SetTimeType(_user$project$Model$Code)),
+					_1: {ctor: '[]'}
+				}
 			},
 			{
 				ctor: '::',
@@ -12574,7 +12654,12 @@ var _user$project$Views$displayTypes = A2(
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html_Attributes$class('btn social'),
-					_1: {ctor: '[]'}
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Events$onClick(
+							_user$project$Messages$SetTimeType(_user$project$Model$Social)),
+						_1: {ctor: '[]'}
+					}
 				},
 				{
 					ctor: '::',
@@ -12588,7 +12673,12 @@ var _user$project$Views$displayTypes = A2(
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html_Attributes$class('btn coffe'),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								_user$project$Messages$SetTimeType(_user$project$Model$Coffee)),
+							_1: {ctor: '[]'}
+						}
 					},
 					{
 						ctor: '::',
@@ -12599,44 +12689,51 @@ var _user$project$Views$displayTypes = A2(
 			}
 		}
 	});
-var _user$project$Views$displayTimer = A2(
-	_elm_lang$html$Html$div,
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$class('container display timer'),
-		_1: {ctor: '[]'}
-	},
-	{
-		ctor: '::',
-		_0: A2(
-			_elm_lang$html$Html$span,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('time'),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html$text('15:00'),
-				_1: {ctor: '[]'}
-			}),
-		_1: {
+var _user$project$Views$displayTimer = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('container display timer'),
+			_1: {ctor: '[]'}
+		},
+		{
 			ctor: '::',
 			_0: A2(
 				_elm_lang$html$Html$span,
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('timeType'),
+					_0: _elm_lang$html$Html_Attributes$class('time'),
 					_1: {ctor: '[]'}
 				},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('The coffe time!'),
+					_0: _elm_lang$html$Html$text(
+						_user$project$Views$formatTime(model.time)),
 					_1: {ctor: '[]'}
 				}),
-			_1: {ctor: '[]'}
-		}
-	});
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$span,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('timeType'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'The ',
+								A2(_elm_lang$core$Basics_ops['++'], model.timeType.displayText, ' time!'))),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			}
+		});
+};
 var _user$project$Views$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -12647,7 +12744,7 @@ var _user$project$Views$view = function (model) {
 		},
 		{
 			ctor: '::',
-			_0: _user$project$Views$displayTimer,
+			_0: _user$project$Views$displayTimer(model),
 			_1: {
 				ctor: '::',
 				_0: _user$project$Views$displayTypes,
@@ -12699,7 +12796,7 @@ var _user$project$Pomodoro$main = _elm_lang$html$Html$programWithFlags(
 var Elm = {};
 Elm['Pomodoro'] = Elm['Pomodoro'] || {};
 if (typeof _user$project$Pomodoro$main !== 'undefined') {
-    _user$project$Pomodoro$main(Elm['Pomodoro'], 'Pomodoro', {"types":{"unions":{"Messages.Msg":{"args":[],"tags":{"Play":[],"SetTimeType":["Int"],"Stop":[]}}},"aliases":{},"message":"Messages.Msg"},"versions":{"elm":"0.18.0"}});
+    _user$project$Pomodoro$main(Elm['Pomodoro'], 'Pomodoro', {"types":{"unions":{"Model.TimeType":{"args":[],"tags":{"Coffee":[],"Code":[],"Social":[]}},"Messages.Msg":{"args":[],"tags":{"Play":[],"SetTime":["Float"],"SetTimeType":["Model.TimeType"],"Stop":[]}}},"aliases":{},"message":"Messages.Msg"},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])

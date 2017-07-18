@@ -3,15 +3,15 @@ module Views exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Messages exposing (Msg(Play, Stop))
-import Model exposing (Model)
+import Messages exposing (Msg(..))
+import Model exposing (Model, TimeType(..))
 
 
 view : Model -> Html Msg
 view model =
     div
         [ class "main" ]
-        [ displayTimer
+        [ displayTimer model
         , displayTypes
         , div
             [ class "container" ]
@@ -20,16 +20,16 @@ view model =
         ]
 
 
-displayTimer : Html Msg
-displayTimer =
+displayTimer : Model -> Html Msg
+displayTimer model =
     div
         [ class "container display timer" ]
         [ span
             [ class "time" ]
-            [ text "15:00" ]
+            [ text <| formatTime model.time ]
         , span
             [ class "timeType" ]
-            [ text "The coffe time!" ]
+            [ text <| "The " ++ model.timeType.displayText ++ " time!" ]
         ]
 
 
@@ -38,13 +38,19 @@ displayTypes =
     div
         [ class "container display types" ]
         [ button
-            [ class "btn code" ]
+            [ class "btn code"
+            , onClick <| SetTimeType Code
+            ]
             [ text "Code" ]
         , button
-            [ class "btn social" ]
+            [ class "btn social"
+            , onClick <| SetTimeType Social
+            ]
             [ text "Social" ]
         , button
-            [ class "btn coffe" ]
+            [ class "btn coffe"
+            , onClick <| SetTimeType Coffee
+            ]
             [ text "Coffee" ]
         ]
 
@@ -64,3 +70,30 @@ controlsPlay =
             ]
             []
         ]
+
+
+formatTime : Float -> String
+formatTime time =
+    let
+        parsedTime =
+            round time
+
+        minutes =
+            (parsedTime % 3600 // 60)
+                |> toFloat
+                |> floor
+
+        seconds =
+            (parsedTime % 3600 % 60)
+                |> toFloat
+                |> floor
+    in
+    paddNumber minutes ++ ":" ++ paddNumber seconds
+
+
+paddNumber : Int -> String
+paddNumber value =
+    if value < 10 then
+        "0" ++ toString value
+    else
+        "" ++ toString value
