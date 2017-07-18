@@ -2,10 +2,12 @@ module Views exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
+import Messages exposing (Msg(Play, Stop))
 import Model exposing (Model)
 
 
-view : Model -> Html msg
+view : Model -> Html Msg
 view model =
     div
         [ class "main" ]
@@ -18,7 +20,7 @@ view model =
         ]
 
 
-displayTimer : Html msg
+displayTimer : Html Msg
 displayTimer =
     div
         [ class "container display timer" ]
@@ -31,7 +33,7 @@ displayTimer =
         ]
 
 
-displayTypes : Html msg
+displayTypes : Html Msg
 displayTypes =
     div
         [ class "container display types" ]
@@ -47,14 +49,18 @@ displayTypes =
         ]
 
 
-controlsPlay : Html msg
+controlsPlay : Html Msg
 controlsPlay =
     div
         [ class "controlsPlay" ]
         [ button
-            [ class "play btnIcon" ]
+            [ class "play btnIcon"
+            , onClick Play
+            ]
             []
         , button
-            [ class "stop btnIcon" ]
+            [ class "stop btnIcon"
+            , onClick Stop
+            ]
             []
         ]

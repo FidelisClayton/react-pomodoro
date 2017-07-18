@@ -6,6 +6,7 @@ import Mousetrap from 'mousetrap';
 import GithubCorner from 'react-github-corner';
 
 import Footer from './../Footer/Footer';
+import Elm from '../../js/elm-pomodoro';
 
 export default class Pomodoro extends React.Component {
 
@@ -30,6 +31,18 @@ export default class Pomodoro extends React.Component {
     this.setDefaultTime();
     this.startShortcuts();
     Notification.requestPermission();
+    this.mountElm(document.getElementById("elm-pomodoro"), this.state)
+  }
+
+  mountElm(node, flags) {
+    const app = Elm.Pomodoro.embed(node, flags)
+
+    this.setupPorts(app)
+  }
+
+  setupPorts(app) {
+    app.ports.play.subscribe(this.play)
+    app.ports.pause.subscribe(this.reset)
   }
 
   elapseTime() {
@@ -75,12 +88,12 @@ export default class Pomodoro extends React.Component {
   }
 
   play() {
-    if (true === this.state.play) return; 
+    if (true === this.state.play) return;
 
     this.restartInterval();
-    
-    this.setState({ 
-      play: true 
+
+    this.setState({
+      play: true
     });
   }
 
@@ -99,11 +112,11 @@ export default class Pomodoro extends React.Component {
 
   setTime(newTime) {
     this.restartInterval();
-    
+
     this.setState({
-      time: newTime, 
-      timeType: newTime, 
-      title: this.getTitle(newTime), 
+      time: newTime,
+      timeType: newTime,
+      title: this.getTitle(newTime),
       play: true
     });
   }
@@ -112,9 +125,9 @@ export default class Pomodoro extends React.Component {
     let defaultTime = 1500;
 
     this.setState({
-      time: defaultTime, 
-      timeType: defaultTime, 
-      title: this.getTitle(defaultTime), 
+      time: defaultTime,
+      timeType: defaultTime,
+      title: this.getTitle(defaultTime),
       play: false
     });
   }
@@ -201,6 +214,7 @@ export default class Pomodoro extends React.Component {
 
         {/* Main section
         ------------------------------- */}
+        <div id="elm-pomodoro"></div>
         <div className="main">
 
           <div className="container display timer">
@@ -237,36 +251,36 @@ export default class Pomodoro extends React.Component {
               <div className="controlsCheck">
 
                 <span className="check">
-                  <input 
-                    type="checkbox" 
-                    ref="notification" 
+                  <input
+                    type="checkbox"
+                    ref="notification"
                     id="notification"
                     defaultChecked={this._getLocalStorage('notification')}
-                    onChange={this._setLocalStorage.bind(this, 'notification')} 
+                    onChange={this._setLocalStorage.bind(this, 'notification')}
                   />
                   <label htmlFor="notification"></label>
                   <span className="checkTitle" >Notification</span>
                 </span>
 
                 <span className="check">
-                  <input 
-                    type="checkbox" 
-                    ref="audio" 
+                  <input
+                    type="checkbox"
+                    ref="audio"
                     id="audio"
                     defaultChecked={this._getLocalStorage('audio')}
-                    onChange={this._setLocalStorage.bind(this, 'audio')} 
+                    onChange={this._setLocalStorage.bind(this, 'audio')}
                   />
                   <label htmlFor="audio"></label>
                   <span className="checkTitle">Sound</span>
                 </span>
 
                 <span className="check">
-                  <input 
-                    type="checkbox" 
-                    ref="vibrate" 
+                  <input
+                    type="checkbox"
+                    ref="vibrate"
                     id="vibrate"
                     defaultChecked={this._getLocalStorage('vibrate')}
-                    onChange={this._setLocalStorage.bind(this, 'vibrate')} 
+                    onChange={this._setLocalStorage.bind(this, 'vibrate')}
                   />
                   <label htmlFor="vibrate"></label>
                   <span className="checkTitle">Vibration</span>
